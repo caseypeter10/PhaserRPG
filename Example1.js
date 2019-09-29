@@ -25,8 +25,17 @@ class Example1 extends Phaser.Scene{
         this.player = this.generatePlayer();
         //this.camera.follow(this.player);
 
-        this.input.on('pointerdown', function(event){   
-            this.add.image(event.x, event.y, 'Tower')
+        this.input.on('pointerdown', function(pointer){   
+            this.add.image(pointer.x, pointer.y, 'Tower');
+
+            var bullet = playerBullets.get().setActive(true).setVisible(true);
+
+            if (bullet)
+            {
+                bullet.fire(this.player, this.reticle);
+                this.physics.add.collider(enemy, bullet, enemyHitCallback);
+            }
+
         }, this);
 
         this.input.keyboard.on('keyup_P', function(event){
@@ -121,7 +130,24 @@ class Example1 extends Phaser.Scene{
         this.xp -= this.xpToNext;
         this.xpToNext = Math.floor(this.xpToNext * 1.1);
         this.notification = this.player.name + ' has advanced to level ' + this.player.level + '!';
-    }
-
-    
+    }   
 }
+
+function enemyHitCallback(enemyHit, bulletHit)
+{
+     // Reduce health of enemy
+     if (bulletHit.active === true && enemyHit.active === true)
+     {
+         enemyHit.health = enemyHit.health - 1;
+         console.log("Enemy hp: ", enemyHit.health);
+ 
+         // Kill enemy if health <= 0
+         if (enemyHit.health <= 0)
+         {
+            enemyHit.setActive(false).setVisible(false);
+         }
+ 
+         // Destroy bullet
+         bulletHit.setActive(false).setVisible(false);
+     }
+ } 
