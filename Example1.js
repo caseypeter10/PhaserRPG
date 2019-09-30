@@ -6,11 +6,11 @@ var enemy = new Phaser.Class({
     // enemy constructor
     function enemy(scene)
     {
-        Phaser.GameObjects.Image.call(this, scene,0,0, 'Enemy');
+        Phaser.GameObjects.Image.add(this, scene,0,0, 'Enemy');
         this.speed = 1;
         this.direction = 0;
-        this.xSpeed = 0;
-        this.ySpeed = 0;
+        this.xSpeed = .1;
+        this.ySpeed = .1;
         this.setPosition(200,200);
         this.setSize(32,32,true);
         this.setActive(true);
@@ -99,7 +99,7 @@ class Example1 extends Phaser.Scene{
         this.load.image('Player', 'assets/player.png');
         this.load.image('Reticle','assets/reticle.png');
         this.load.image('Bullet', 'assets/ammo.png');
-        this.load.image('Enemy', 'assets/monster.png');
+        this.load.image('Enemy', 'C:\\wamp64\\www\\assets\\monster.png');
     }
 
     create(){
