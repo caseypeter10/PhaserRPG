@@ -24,9 +24,9 @@ var bullet = new Phaser.Class({
         // Calculate X and y velocity of bullet to moves it from shooter to target
         if (target.y >= shooter.y)
         {
-            console.log("this.player.rotation in movement handler = " + this.player.rotation);
+            //console.log("this.player.rotation in movement handler = " + this.player.rotation);
 
-            console.log("shooter.rotation is: " + shooter.rotation);
+            console.log("shooter.rotation is: " + shooter.direction);
 
             this.xSpeed = this.speed*Math.sin(this.direction);           
             this.ySpeed = this.speed*Math.cos(this.direction);            
@@ -88,14 +88,15 @@ class Example1 extends Phaser.Scene{
         this.player = this.generatePlayer();
         //this.camera.follow(this.player);
 
-        this.input.on('pointerdown', function(pointer){   
+        this.input.on('pointerdown', function(player, reticle){   
             //this.add.image(pointer.x, pointer.y, 'Tower');
 
             var bullet = this.playerBullets.get().setActive(true).setVisible(true);
 
             if (bullet)
             {
-                bullet.fire(this.player.rotation, this.reticle);
+                console.log("This.player.rotation before bullet.fire: " + this.player.rotation);
+                bullet.fire(this.player, this.reticle);
                 //this.physics.add.collider(enemy, bullet, enemyHitCallback);
             }
 
@@ -120,8 +121,8 @@ class Example1 extends Phaser.Scene{
             {
                 this.reticle.x = pointer.x;
                 this.reticle.y = pointer.y;
-                console.log("this.reticle.x = " + this.reticle.x);
-                console.log("this.reticle.y = " + this.reticle.y);
+                //console.log("this.reticle.x = " + this.reticle.x);
+                //console.log("this.reticle.y = " + this.reticle.y);
             }
         }, this)
 
@@ -136,7 +137,7 @@ class Example1 extends Phaser.Scene{
     movementHandler(){
 
         this.player.rotation = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.reticle.x, this.reticle.y);
-        console.log("this.player.rotation in movement handler = " + this.player.rotation);
+        //console.log("this.player.rotation in movement handler = " + this.player.rotation);
 
         if(this.key_A.isDown){
             this.player.x--;
