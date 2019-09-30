@@ -1,3 +1,30 @@
+var enemy = new Phaser.Class({
+    Extends: Phaser.GameObjects.Image,
+
+    initialize:
+
+    // enemy constructor
+    function enemy(scene)
+    {
+        Phaser.GameObjects.Image.call(this, scene,0,0, 'Enemy');
+        this.speed = 1;
+        this.direction = 0;
+        this.xSpeed = 0;
+        this.ySpeed = 0;
+        this.setPosition(200,200);
+        this.setSize(32,32,true);
+        this.setActive(true);
+        this.setVisible(true);
+    },
+
+    update: function(delta)
+    {
+        this.x += this.xSpeed * delta;
+        this.y += this.ySpeed * delta;
+    }
+
+})
+
 var bullet = new Phaser.Class({
     Extends: Phaser.GameObjects.Image,
 
@@ -17,7 +44,6 @@ var bullet = new Phaser.Class({
 
     fire: function(shooter, target)
     {
-
         this.setPosition(shooter.x, shooter.y); 
         this.rotation = shooter.rotation;
         this.direction = Math.atan( (target.x-this.x) / (target.y - this.y));
@@ -62,6 +88,7 @@ var bullet = new Phaser.Class({
 
 });
 
+
 class Example1 extends Phaser.Scene{
     constructor() {
         super({key:"Example1"});
@@ -72,11 +99,14 @@ class Example1 extends Phaser.Scene{
         this.load.image('Player', 'assets/player.png');
         this.load.image('Reticle','assets/reticle.png');
         this.load.image('Bullet', 'assets/ammo.png');
+        this.load.image('Enemy', 'assets/monster.png');
     }
 
     create(){
         
         this.playerBullets = this.physics.add.group({ classType: bullet, runChildUpdate: true});
+        this.enemyBullets = this.physics.add.group({classType: bullet, runChildUpdate: true});
+        this.enemies = this.physics.add.group({classType: enemy, runChildUpdate: true });
 
         this.key_W = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
         this.key_A = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
@@ -85,6 +115,9 @@ class Example1 extends Phaser.Scene{
 
 
         this.reticle = this.add.sprite(300 + 20, 400 + 20, 'Reticle');
+
+        var enemy = this.enemies.get().setActive(true).setVisible(true);
+        enemy.setPosition(200, 200);
 
         this.player = this.generatePlayer();
         //this.camera.follow(this.player);
@@ -98,9 +131,8 @@ class Example1 extends Phaser.Scene{
             {
                 console.log("This.player.rotation before bullet.fire: " + this.player.rotation);
                 bullet.fire(this.player, this.reticle);
-                //this.physics.add.collider(enemy, bullet, enemyHitCallback);
+                this.physics.add.collider(enemy, bullet, enemyHitCallback);
             }
-
         }, this);
 
         this.input.keyboard.on('keyup_P', function(event){
@@ -207,7 +239,7 @@ function enemyHitCallback(enemyHit, bulletHit)
      if (bulletHit.active === true && enemyHit.active === true)
      {
          enemyHit.health = enemyHit.health - 1;
-         console.log("Enemy hp: ", enemyHit.health);
+         console.log("Enemy hp: blart", enemyHit.health);
  
          // Kill enemy if health <= 0
          if (enemyHit.health <= 0)
