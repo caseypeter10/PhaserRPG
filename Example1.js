@@ -19,6 +19,7 @@ var bullet = new Phaser.Class({
     {
 
         this.setPosition(shooter.x, shooter.y); 
+        this.rotation = shooter.rotation;
         this.direction = Math.atan( (target.x-this.x) / (target.y - this.y));
         
         // Calculate X and y velocity of bullet to moves it from shooter to target
@@ -26,7 +27,7 @@ var bullet = new Phaser.Class({
         {
             //console.log("this.player.rotation in movement handler = " + this.player.rotation);
 
-            console.log("shooter.rotation is: " + shooter.direction);
+            console.log("shooter.direction is: " + shooter.direction);
 
             this.xSpeed = this.speed*Math.sin(this.direction);           
             this.ySpeed = this.speed*Math.cos(this.direction);            
@@ -34,13 +35,13 @@ var bullet = new Phaser.Class({
         }
         else
         {
-            console.log("shooter.rotation is: " + shooter.rotation);
+            console.log("shooter.rotation in else is: " + shooter.rotation);
 
-            this.xSpeed = this.speed*Math.sin(this.direction);
+            this.xSpeed = -1*(this.speed*Math.sin(this.direction));
             console.log("this.direction is: " + this.direction);
             console.log("xSpeed is:" + this.xSpeed);
             console.log("bullet this.direction is: " + this.direction);
-            this.ySpeed = this.speed*Math.cos(this.direction);
+            this.ySpeed = -1*(this.speed*Math.cos(this.direction));
             console.log("ySpeed is: " + this.ySpeed);
         }
 
