@@ -1,3 +1,66 @@
+var bullet = new Phaser.Class({
+    Extends: Phaser.GameObjects.Image,
+
+    initialize:
+
+    //Bullet Constructor
+    function bullet(scene)
+    {
+        Phaser.GameObjects.Image.call(this, scene, 0, 0, 'Bullet');
+        this.speed = 1;
+        this.born = 0;
+        this.direction = 0;
+        this.xSpeed = 0;
+        this.ySpeed = 0;
+        this.setSize(12, 12, true);
+    },
+
+    fire: function(shooter, target)
+    {
+        this.setPosition(shooter.x, shooter.y);
+        this.direction = (Math.atan( (target.x-this.x) / (target.y-this.y)));
+        console.log("this.direction is: " + this.direction);
+        console.log("target.x is: " + target.x);
+        console.log("target.y is: " + target.y);
+
+        console.log("shooter.x is: " + this.x);
+        console.log("shooter.y is: " + this.y);
+        
+
+        // Calculate X and y velocity of bullet to moves it from shooter to target
+        if (target.y >= shooter.y)
+        {
+            this.xSpeed = this.speed*Math.cos(this.direction);
+            console.log("xSpeed is:" + this.xSpeed);
+            this.ySpeed = this.speed*Math.sin(this.direction);
+            console.log("ySpeed is: " + this.ySpeed);
+        }
+        else
+        {
+            this.xSpeed = this.speed*Math.cos(this.direction);
+            console.log("xSpeed is:" + this.xSpeed);
+            this.ySpeed = this.speed*Math.sin(this.direction);
+            console.log("ySpeed is: " + this.ySpeed);
+        }
+
+        this.rotation = shooter.rotation; // angle bullet with shooters rotation
+        this.born = 0; // Time since new bullet spawned
+    },
+
+    update: function(time, delta)
+    {
+        this.x += this.xSpeed * delta;
+        this.y += this.ySpeed * delta;
+        this.born += delta;
+        if (this.born > 1800)
+        {
+            this.setActive(false);
+            this.setVisible(false);
+        }
+    }
+
+});
+
 class Example1 extends Phaser.Scene{
     constructor() {
         super({key:"Example1"});
@@ -12,7 +75,7 @@ class Example1 extends Phaser.Scene{
 
     create(){
         
-        playerBullets = this.physics.add.group({ classType: Bullet, runChileUpdate: true});
+        this.playerBullets = this.physics.add.group({ classType: bullet, runChildUpdate: true});
 
         this.key_W = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
         this.key_A = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
@@ -26,14 +89,14 @@ class Example1 extends Phaser.Scene{
         //this.camera.follow(this.player);
 
         this.input.on('pointerdown', function(pointer){   
-            this.add.image(pointer.x, pointer.y, 'Tower');
+            //this.add.image(pointer.x, pointer.y, 'Tower');
 
-            var bullet = playerBullets.get().setActive(true).setVisible(true);
+            var bullet = this.playerBullets.get().setActive(true).setVisible(true);
 
             if (bullet)
             {
                 bullet.fire(this.player, this.reticle);
-                this.physics.add.collider(enemy, bullet, enemyHitCallback);
+                //this.physics.add.collider(enemy, bullet, enemyHitCallback);
             }
 
         }, this);
@@ -57,6 +120,8 @@ class Example1 extends Phaser.Scene{
             {
                 this.reticle.x = pointer.x;
                 this.reticle.y = pointer.y;
+                console.log("this.reticle.x = " + this.reticle.x);
+                console.log("this.reticle.y = " + this.reticle.y);
             }
         }, this)
 
@@ -70,7 +135,8 @@ class Example1 extends Phaser.Scene{
 
     movementHandler(){
 
-        this.player.rotation = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.reticle.x, this.reticle.y) + 1.6;
+        this.player.rotation = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.reticle.x, this.reticle.y);
+        console.log("this.player.rotation = " + this.player.rotation);
 
         if(this.key_A.isDown){
             this.player.x--;
