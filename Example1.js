@@ -11,6 +11,7 @@ var enemy = new Phaser.Class({
         this.direction = 0;
         this.xSpeed = 0;
         this.ySpeed = 0;
+        this.health = 3;
         this.setPosition(200,200);
         this.setSize(32,32,true);
         this.setActive(true);
@@ -103,6 +104,8 @@ class Example1 extends Phaser.Scene{
     }
 
     create(){
+
+        this.physics.world.setBounds(0,0,1600,1200);
         
         this.playerBullets = this.physics.add.group({ classType: bullet, runChildUpdate: true});
         this.enemyBullets = this.physics.add.group({classType: bullet, runChildUpdate: true});
@@ -115,12 +118,15 @@ class Example1 extends Phaser.Scene{
 
 
         this.reticle = this.add.sprite(300 + 20, 400 + 20, 'Reticle');
-
         var enemyA = this.enemies.get().setActive(true).setVisible(true);
 
         enemyA.setPosition(200, 200);
+        
 
         this.player = this.generatePlayer();
+        this.cameras.main.zoom = 1;
+        this.cameras.main.startFollow(this.player);
+        
         //this.camera.follow(this.player);
 
         this.input.on('pointerdown', function(pointer, reticle){   
@@ -173,23 +179,63 @@ class Example1 extends Phaser.Scene{
         this.player.rotation = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.reticle.x, this.reticle.y);
         //console.log("this.player.rotation in movement handler = " + this.player.rotation);
 
-        if(this.key_A.isDown){
-            this.player.x--;
-        }
-        if(this.key_W.isDown){
-            this.player.y--;
-        }
-        if(this.key_S.isDown){
-            this.player.y++;
-        }
-        if(this.key_D.isDown){
-            this.player.x++;
+        // Up-Left
+        if(this.key_W.isDown && this.key_A.isDown){
+            this.player.body.velocity.x = -this.player.speed;
+            this.player.body.velocity.y = -this.player.speed;
+        
+        //Up-Right
+        } else if (this.key_W.isDown && this.key_D.isDown){
+            this.player.body.velocity.x = this.player.speed;
+            this.player.body.velocity.y = -this.player.speed;
+        
+        //Down-Left
+        } else if(this.key_S.isDown && this.key_A.isDown){
+            this.player.body.velocity.x = -this.player.speed;
+            this.player.body.velocity.y = this.player.speed;
+        
+        //Down-Right
+        } else if (this.key_S.isDown && this.key_D.isDown){
+            this.player.body.velocity.x = this.player.speed;
+            this.player.body.velocity.y = this.player.speed;
+
+        // Up
+        } else if (this.key_W.isDown){
+            this.player.body.velocity.x = 0;
+            console.log("this.player.body.velocity.x" + this.player.body.velocity.x)
+            this.player.body.velocity.y = -this.player.speed;
+            console.log("this.player.body.velocity.y" + this.player.body.velocity.y)
+        
+        //Down
+        } else if (this.key_S.isDown){
+            this.player.body.velocity.x = 0;
+            this.player.body.velocity.y = this.player.speed;
+        
+        //Left
+        } else if (this.key_A.isDown) {
+            this.player.body.velocity.x = -this.player.speed;
+            this.player.body.velocity.y = 0;
+
+        //Right
+        } else if (this.key_D.isDown){
+            this.player.body.velocity.x = this.player.speed;
+            this.player.body.velocity.y = 0;
+        
+        // Still
+        } else {
+            this.player.body.velocity.x = 0;
+            this.player.body.velocity.y = 0;
         }
     }
 
     generatePlayer(){
         // Generate the player
-        var player = this.add.sprite(300, 400, 'Player');
+
+        //physics is necessary for it to have an "arcade physics body"
+        var player = this.physics.add.sprite(300, 400, 'Player');
+   
+        //this.physics.arcade.enable(player);
+        player.body.collideWorldBounds = true;
         //player.body.collideWorldBounds = false;
         player.alive = true;
 
@@ -200,6 +246,8 @@ class Example1 extends Phaser.Scene{
         player.vitality = 100;
         player.strength = 25;
         player.speed = 125;
+        player.xp = 0;
+        player.xpToNext = 20;
 
         return player;
     }
@@ -231,7 +279,17 @@ class Example1 extends Phaser.Scene{
         this.xp -= this.xpToNext;
         this.xpToNext = Math.floor(this.xpToNext * 1.1);
         this.notification = this.player.name + ' has advanced to level ' + this.player.level + '!';
-    }   
+    }
+    
+    //enemyHandler(){
+    //    this.enemies.forEachAlive(function)
+    //}
+
+
+    //generateEnemies(amount){
+    //    this.enemies = 
+    //}
+
 }
 
 function enemyHitCallback(enemyHit, bulletHit)
@@ -240,15 +298,37 @@ function enemyHitCallback(enemyHit, bulletHit)
      if (bulletHit.active === true && enemyHit.active === true)
      {
          enemyHit.health = enemyHit.health - 1;
-         console.log("Enemy hp: blart", enemyHit.health);
+         console.log("Enemy hp: ", enemyHit.health);
  
          // Kill enemy if health <= 0
-         //if (enemyHit.health <= 0)
-         //{
-         enemyHit.setActive(false).setVisible(false);
-         //}
+         if (enemyHit.health <= 0)
+         {
+            enemyHit.setActive(false).setVisible(false);
+            this.xp += 25;
+         }
  
          // Destroy bullet
          bulletHit.setActive(false).setVisible(false);
      }
  } 
+
+ // Ensures sprite speed doesnt exceed maxVelocity while update is called
+function constrainVelocity(sprite, maxVelocity)
+{
+    if (!sprite || !sprite.body)
+      return;
+
+    var angle, currVelocitySqr, vx, vy;
+    vx = sprite.body.velocity.x;
+    vy = sprite.body.velocity.y;
+    currVelocitySqr = vx * vx + vy * vy;
+
+    if (currVelocitySqr > maxVelocity * maxVelocity)
+    {
+        angle = Math.atan2(vy, vx);
+        vx = Math.cos(angle) * maxVelocity;
+        vy = Math.sin(angle) * maxVelocity;
+        sprite.body.velocity.x = vx;
+        sprite.body.velocity.y = vy;
+    }
+}
