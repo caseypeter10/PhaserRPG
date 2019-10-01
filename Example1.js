@@ -255,19 +255,19 @@ class Example1 extends Phaser.Scene{
     showLabels(){
         var text  ='9';
         var style = {font: '10px Arial', fill: '#fff', align: 'center'};
-        this.notificationLabel = this.add.text( 25, 25, text, style);
+        this.notificationLabel = this.add.text( 25, 25, text, style).setScrollFactor(0);
 
         var style = {font: '10px Arial', fill: '#fff', align: 'center'};
-        this.xpLabel = this.add.text(25, 550, text, style);
+        this.xpLabel = this.add.text(25, 550, text, style).setScrollFactor(0);
     
         var style = { font: '20px Arial', fill: '#fff', align: 'center' };
-        this.healthLabel = this.add.text(225, 575, text, style);
+        this.healthLabel = this.add.text(225, 575, text, style).setScrollFactor(0);
 
         var style = { font: '10px Arial', fill: '#fff', align: 'center' };
-        this.goldLabel = this.add.text(725, 25, text, style);
+        this.goldLabel = this.add.text(725, 25, text, style).setScrollFactor(0);
 
         var style = { font: '10px Arial', fill: '#fff', align: 'center' };
-        this.spellLabel = this.add.text(230, 575, text, style);
+        this.spellLabel = this.add.text(230, 575, text, style).setScrollFactor(0);
     }
 
     levelUp(){
@@ -305,6 +305,7 @@ function enemyHitCallback(enemyHit, bulletHit)
          {
             enemyHit.setActive(false).setVisible(false);
             this.xp += 25;
+            console.log("this.xp: " + this.xp);
          }
  
          // Destroy bullet
